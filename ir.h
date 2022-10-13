@@ -6,4 +6,5 @@
 void ir_setup(void);
 void ir_poll(void);
 void ir_run_command(int command);
+void enable(void);
 #endif

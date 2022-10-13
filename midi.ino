@@ -1,125 +1,144 @@
 #include "midi.h"
 #include "led.h"
 
-uint8_t led_mapping[88] = { //Mapping: index|value 'piano key'|'led'
-  73, //A  0
-  72, //A# 0
-  71, //B  0
-  70, //C  1
-  69, //C# 1
-  68, //D  1
-  67, //D# 1
-  67, //E  1
-  66, //F  1
-  65, //F# 1
-  64, //G  1
-  63, //G# 1
-  63, //A  1
-  62, //A# 1
-  61, //B  1
-  60, //C  2
-  59, //C# 2
-  59, //D  2
-  58, //D# 2
-  57, //E  2
-  56, //F  2
-  55, //F# 2
-  54, //G  2
-  54, //G# 2
-  53, //A  2
-  52, //A# 2
-  51, //B  2
-  50, //C  3
-  50, //C# 3
-  49, //D  3
-  48, //D# 3
-  47, //E  3
-  46, //F  3
-  45, //F# 3
-  44, //G  3
-  44, //G# 3
-  43, //A  3
-  42, //A# 3
-  41, //B  3
-  40, //C  4
-  40, //C# 4
-  39, //D  4
-  38, //D# 4
-  37, //E  4
-  36, //F  4
-  36, //F# 4
-  35, //G  4
-  34, //G# 4
-  33, //A  4
-  32, //A# 4
-  31, //B  4
-  30, //C  5
-  30, //C# 5
-  29, //D  5
-  28, //D# 5
-  27, //E  5
-  26, //F  5
-  26, //F# 5
-  25, //G  5
-  24, //G# 5
-  23, //A  5
-  22, //A# 5
-  22, //B  5
-  21, //C  6
-  20, //C# 6
-  19, //D  6
-  18, //D# 6
-  17, //E  6
-  16, //F  6
-  16, //F# 6
-  15, //G  6
-  14, //G# 6
-  13, //A  6
-  12, //A# 6
-  12, //B  6
-  11, //C  7
-  10, //C# 7
-   9, //D  7
-   8, //D# 7
-   7, //E  7
-   6, //F  7
-   6, //F# 7
-   5, //G  7
-   4, //G# 7
-   3, //A  7
-   2, //A# 7
-   1, //B  7
-   0, //C  8
+uint8_t led_mapping[88] = {
+    // Mapping: index|value 'piano key'|'led'
+    0,  // A  0
+    1,  // A# 0
+    2,  // B  0
+    3,  // C  1
+    4,  // C# 1
+    4,  // D  1
+    5,  // D# 1
+    6,  // E  1
+    7,  // F  1
+    8,  // F# 1
+    9,  // G  1
+    9,  // G# 1
+    10, // A  1
+    11, // A# 1
+    12, // B  1
+    13, // C  2
+    14, // C# 2
+    14, // D  2
+    15, // D# 2
+    16, // E  2
+    17, // F  2
+    18, // F# 2
+    19, // G  2
+    19, // G# 2
+    20, // A  2
+    21, // A# 2
+    22, // B  2
+    23, // C  3
+    24, // C# 3
+    24, // D  3
+    25, // D# 3
+    26, // E  3
+    27, // F  3
+    28, // F# 3
+    28, // G  3
+    29, // G# 3
+    30, // A  3
+    31, // A# 3
+    32, // B  3
+    33, // C  4
+    33, // C# 4
+    34, // D  4
+    35, // D# 4
+    36, // E  4
+    37, // F  4
+    38, // F# 4
+    38, // G  4
+    39, // G# 4
+    40, // A  4
+    41, // A# 4
+    42, // B  4
+    42, // C  5
+    43, // C# 5
+    44, // D  5
+    45, // D# 5
+    46, // E  5
+    47, // F  5
+    48, // F# 5
+    48, // G  5
+    49, // G# 5
+    50, // A  5
+    51, // A# 5
+    51, // B  5
+    52, // C  6
+    53, // C# 6
+    54, // D  6
+    55, // D# 6
+    56, // E  6
+    57, // F  6
+    57, // F# 6
+    58, // G  6
+    59, // G# 6
+    60, // A  6
+    61, // A# 6
+    61, // B  6
+    62, // C  7
+    63, // C# 7
+    64, // D  7
+    65, // D# 7
+    65, // E  7
+    66, // F  7
+    67, // F# 7
+    68, // G  7
+    69, // G# 7
+    70, // A  7
+    71, // A# 7
+    72, // B  7
+    73, // C  8
 };
 
-void midi_setup() {
-  if (Usb.Init() == -1) {
-    while (1); //halt
+void midi_setup()
+{
+  if (Usb.Init() == -1)
+  {
+    while (1)
+      ; // halt
   }
 }
 
-void MIDI_noteOn(uint8_t note, uint16_t velocity) {
+void MIDI_noteOn(uint8_t note, uint16_t velocity)
+{
   note -= MIDI_INDEX_OFFSET;
 
   uint8_t led = led_mapping[note];
-  leds[led] = leds_buffer[led];
-
-  if (responsive_intensity) {
-    leds[led].fadeLightBy(255 - (velocity * 7) / 4);
+  switch (active_state)
+  {
+  case GRADIENT:
+    leds[led] = get_gradient_value(LED_COUNT, led);
+    break;
+  case RAINBOW:
+    leds[led] = get_rainbow_value(LED_COUNT, led);
+    break;
+  default:
+    leds[led] = CHSV(active_hue, DEFAULT_SATURATION, DEFAULT_INTENSITY);
+    break;
   }
 
+  if (responsive_intensity)
+  {
+    leds[led].fadeLightBy(255 - (velocity * 7) / 4);
+  }
 }
 
-void MIDI_noteOff(uint8_t note) {
+void MIDI_noteOff(uint8_t note)
+{
   note -= MIDI_INDEX_OFFSET;
   uint8_t led = led_mapping[note];
   leds[led] = BLANK_LED;
 }
 
-void MIDI_poll() {
+void MIDI_poll()
+{
   Usb.Task();
 
-  if (!Midi) {
+  if (!Midi)
+  {
     return;
   }
 
@@ -127,31 +146,33 @@ void MIDI_poll() {
   uint8_t size;
   static bool hasUpdated = false;
 
-  do {
+  do
+  {
     size = Midi.RecvData(recvBuf);
-    if ( size > 0 ) {
-      //MIDI Output
-      switch (recvBuf[0]) {
-        case 144: //Note on
-          MIDI_noteOn(recvBuf[1], recvBuf[2]);
-          hasUpdated = true;
-          break;
+    if (size > 0)
+    {
+      // MIDI Output
+      switch (recvBuf[0])
+      {
+      case 144: // Note on
+        MIDI_noteOn(recvBuf[1], recvBuf[2]);
+        hasUpdated = true;
+        break;
 
-        case 128: //Note off
-          MIDI_noteOff(recvBuf[1]);
-          hasUpdated = true;
-          break;
+      case 128: // Note off
+        MIDI_noteOff(recvBuf[1]);
+        hasUpdated = true;
+        break;
 
-        default:
-          break;
+      default:
+        break;
       }
     }
   } while (size > 1);
 
-  if (hasUpdated) {
+  if (hasUpdated)
+  {
     FastLED.show();
     hasUpdated = false;
   }
-
-
 }
