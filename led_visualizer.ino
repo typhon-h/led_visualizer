@@ -31,7 +31,7 @@ void setup()
   cycle_task.disable();
   midi_task.disable();
 
-  ir_run_command(0x17); // Static default
+  // ir_run_command(0x17); // Static default
   ir_run_command(0x13);
 }
 

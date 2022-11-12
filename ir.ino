@@ -15,17 +15,12 @@ void ir_poll()
 {
   if (IrReceiver.decode())
   {
-    if (IrReceiver.decodedIRData.protocol == 8) // NEC
+    if (IrReceiver.decodedIRData.protocol == NEC) // NEC
     {
       ir_run_command(IrReceiver.decodedIRData.command);
     }
     IrReceiver.resume();
   }
-  Serial.print(IrReceiver.decodedIRData.command);
-  Serial.print(' ');
-  // Serial.print(power_on);
-  Serial.print(' ');
-  Serial.println(intensity);
 }
 
 void strip_on()
